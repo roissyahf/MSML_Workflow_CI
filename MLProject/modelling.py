@@ -1,5 +1,4 @@
 import mlflow
-import dagshub
 import pandas as pd
 import random
 from lightgbm import LGBMClassifier
@@ -11,12 +10,8 @@ import numpy as np
 import os
 import warnings
 
-# set dagshub repository
-dagshub.init(repo_owner='roissyahfk', repo_name='MSML_Model_Building', mlflow=True)
-
 # set tracking URI
-#mlflow.set_tracking_uri("http://127.0.0.1:5000/")
-mlflow.set_tracking_uri("https://dagshub.com/roissyahfk/MSML_Model_Building.mlflow")
+mlflow.set_tracking_uri("http://127.0.0.1:5000/")
 
 # set experiment name
 mlflow.set_experiment("Eksperimen Loan Approval Model")
