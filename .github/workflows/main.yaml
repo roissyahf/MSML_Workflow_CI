@@ -3,7 +3,7 @@ name: Run CI/CD MLflow
 on:
   push:
     paths:
-      - 'MLProject/**'
+      - 'MLproject/**'
       - '.github/workflows/main.yml'
     branches:
       - main
@@ -12,8 +12,8 @@ on:
       - main
 
 env:
-  TRAIN_CSV_URL: "MLProject/train_data.csv"
-  TEST_CSV_URL: "MLProject/test_data.csv"
+  TRAIN_CSV_URL: "MLproject/train_data.csv"
+  TEST_CSV_URL: "MLproject/test_data.csv"
   TARGET_VAR: "loan_status"
 
 jobs:
