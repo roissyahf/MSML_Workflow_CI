@@ -1,0 +1,10 @@
+name: my_loan_approval_project
+conda_env: conda.yaml
+entry_points:
+  main:
+    parameters:
+      n_estimators: {type: int, default: 100}
+      learning_rate: {type: float, default: 0.1}
+      num_leaves: {type: int, default: 31}
+      dataset : {type: string, default: "train_data.csv"}
+    command: "python modelling.py {n_estimators} {learning_rate} {num_leaves} {dataset}"
