@@ -1,7 +1,7 @@
 MLproject/credentials.json
 MLproject/.env
 
-MLproject/mlartifacts/
-MLproject/mlruns/
+mlartifacts/
+mlruns/
 MLproject/plots/
 MLproject/LGBM_v3.joblib
