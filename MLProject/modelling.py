@@ -1,111 +1,68 @@
-import mlflow
 import pandas as pd
-import random
 from lightgbm import LGBMClassifier
-from joblib import dump
-from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
-import seaborn as sns
-import matplotlib.pyplot as plt
-import numpy as np
+import joblib
 import os
 import warnings
 
-# set tracking URI
-mlflow.set_tracking_uri("http://127.0.0.1:5000/")
+class MLModel:
+        def __init__(self):
+               self.model = LGBMClassifier()
 
-# set experiment name
-mlflow.set_experiment("Eksperimen Loan Approval Model")
+        def load_data(self, path):
+               """Load preprocessed data from a CSV file."""
+               df_train = pd.read_csv(os.path.join(path, "train_data.csv"))
+               df_test = pd.read_csv(os.path.join(path, "test_data.csv"))
+               return df_train, df_test
+        
+        def split_X_y(self, df_train, df_test):
+               """Split the DataFrame into features and target variable."""
+               X_train = df_train.drop(columns=['loan_status'])
+               y_train = df_train['loan_status']
+               X_test = df_test.drop(columns=['loan_status'])
+               y_test = df_test['loan_status']
+               return X_train, y_train, X_test, y_test
+
+        def train(self, X_train, y_train):
+                """Train the model using the training data."""
+                self.model.fit(X_train, y_train)
+                return self.model
+        
+        def evaluate(self, X_test, y_test):
+                """Evaluate the model"""
+                return self.model.score(X_test, y_test)
+
+        def predict(self, X_test):
+                """Make predictions using the trained model."""
+                return self.model.predict(X_test)
+
+        def save_model(self, path):
+                joblib.dump(self.model, path)
+
+        def load_model(self, path):
+                """Load a pre-trained model from a file."""
+                self.model = joblib.load(path)
 
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
 
-    # read train and test set
-    train_file_path = os.path.join(os.path.dirname(__file__), "train_data.csv")
-    test_file_path = os.path.join(os.path.dirname(__file__), "test_data.csv")
+    # train and test set paths
+    path = os.path.join(os.path.dirname(__file__), "MLProject")
 
-    df_train = pd.read_csv(train_file_path)
-    df_test = pd.read_csv(test_file_path)
+    # model initialization
+    model = MLModel()
+
+    # load data
+    df_train, df_test = model.load_data(path)
 
     # split features and target variable
-    X_train = df_train.drop(columns=['loan_status'])
-    y_train = df_train['loan_status']
-    X_test = df_test.drop(columns=['loan_status'])
-    y_test = df_test['loan_status']
+    X_train, y_train, X_test, y_test = model.split_X_y(df_train, df_test)
 
-    # take input example
-    input_example = X_train[20:25]
-
-    # log datasets
-    dataset_version = "v1.0"
-
-    # log parameters
-    n_estimators=90
-    learning_rate=0.03
-    num_leaves=32
-    random_state=random.randint(0, 1000)
-
-    # start MLflow run
-    #with mlflow.start_run():
-    # create and train the model
-    model = LGBMClassifier(
-            n_estimators=n_estimators,
-            learning_rate=learning_rate,
-            num_leaves=num_leaves,
-            random_state=random_state)
-    
-    model.fit(X_train, y_train)
-
-    # save to local file
-    dump(model, "LGBM_v3.joblib")
+    # train the model
+    model.train(X_train, y_train)
 
     # evaluate the model
-    y_pred = model.predict(X_test)
-    y_pred_proba = model.predict_proba(X_test)[:, 1]
+    score = model.evaluate(X_test, y_test)
+    print(f"Model accuracy: {score}")
 
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred)
-    recall = recall_score(y_test, y_pred)
-    f1_score = f1_score(y_test, y_pred)
-    auc = roc_auc_score(y_test, y_pred_proba)
-    
-    # log dataset
-    mlflow.log_param("dataset_version", dataset_version)
-    mlflow.log_param("dataset_path", train_file_path)
-
-    # log model parameters
-    mlflow.log_param("n_estimators", n_estimators)
-    mlflow.log_param("learning_rate", learning_rate)
-    mlflow.log_param("num_leaves", num_leaves)
-    mlflow.log_param("random_state", random_state)
-
-    # log metrics
-    mlflow.log_metric("accuracy", accuracy)
-    mlflow.log_metric("precision", precision)
-    mlflow.log_metric("recall", recall)
-    mlflow.log_metric("f1_score", f1_score)
-    mlflow.log_metric("auc", auc)
-
-    # log confusion matrix
-    conf_mat = confusion_matrix(y_test, y_pred)
-    plt.figure(figsize=(6,4))
-    sns.heatmap(conf_mat, annot=True, fmt="d", cmap="Oranges")
-    plt.title("Confusion Matrix")
-    plt.xlabel("Predicted")
-    plt.ylabel("Actual")
-    plt.tight_layout()
-    
-    random_int = np.random.randint(0, 100)
-    os.makedirs("plots", exist_ok=True)
-    plt.savefig(f"plots/test_confusion_matrix.png")
-    plt.close()
-
-    # log model
-    mlflow.sklearn.log_model(
-            sk_model=model,
-            artifact_path="model",
-            input_example=input_example)
-
-    # log artifacts
-    mlflow.log_artifact(train_file_path, artifact_path="datasets")
-    mlflow.log_artifact("LGBM_v3.joblib", artifact_path="model_artifacts")
-    mlflow.log_artifact(f"plots/test_confusion_matrix.png")
+    # save the model to local file
+    model.save_model("LGBM_v3.joblib")
