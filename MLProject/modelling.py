@@ -8,10 +8,10 @@ class MLModel:
         def __init__(self):
                self.model = LGBMClassifier()
 
-        def load_data(self, path):
+        def load_data(self, train_path, test_path):
                """Load preprocessed data from a CSV file."""
-               df_train = pd.read_csv(os.path.join(path, "train_data.csv"))
-               df_test = pd.read_csv(os.path.join(path, "test_data.csv"))
+               df_train = pd.read_csv(train_path)
+               df_test = pd.read_csv(test_path)
                return df_train, df_test
         
         def split_X_y(self, df_train, df_test):
@@ -38,21 +38,18 @@ class MLModel:
         def save_model(self, path):
                 joblib.dump(self.model, path)
 
-        def load_model(self, path):
-                """Load a pre-trained model from a file."""
-                self.model = joblib.load(path)
-
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
 
     # train and test set paths
-    path = os.path.join(os.path.dirname(__file__), "MLProject")
+    train_path = os.path.join(os.path.dirname(__file__), "train_data.csv")
+    test_path = os.path.join(os.path.dirname(__file__), "test_data.csv")
 
     # model initialization
     model = MLModel()
 
     # load data
-    df_train, df_test = model.load_data(path)
+    df_train, df_test = model.load_data(train_path, test_path)
 
     # split features and target variable
     X_train, y_train, X_test, y_test = model.split_X_y(df_train, df_test)
