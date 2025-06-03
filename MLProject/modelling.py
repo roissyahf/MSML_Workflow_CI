@@ -20,9 +20,12 @@ if __name__ == '__main__':
     warnings.filterwarnings("ignore")
 
     # read train and test set
-    input_file_path = os.path.join(os.path.dirname(__file__), "MLproject")
-    train_file_path = os.path.join(input_file_path, "train_data.csv")
-    test_file_path = os.path.join(input_file_path, "test_data.csv")
+    #input_file_path = os.path.join(os.path.dirname(__file__), "MLproject")
+    #train_file_path = os.path.join(input_file_path, "train_data.csv")
+    #test_file_path = os.path.join(input_file_path, "test_data.csv")
+
+    train_file_path = os.path.join(os.path.dirname(__file__), "train_data.csv")
+    test_file_path = os.path.join(os.path.dirname(__file__), "test_data.csv")
 
     df_train = pd.read_csv(train_file_path)
     df_test = pd.read_csv(test_file_path)

@@ -16,4 +16,5 @@ dependencies:
   - pyarrow==18.1.0
   - scikit-learn==1.6.1
   - scipy==1.15.3
-name: mlflow-env
+  - seaborn==0.13.2
+name: loan-approval-prediction
