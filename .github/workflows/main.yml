@@ -12,6 +12,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      MLFLOW_TRACKING_URI: http://127.0.0.1:5000
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -29,6 +32,16 @@ jobs:
           environment-file: MLProject/conda.yaml
           auto-activate-base: false
 
+      - name: Start MLflow tracking server
+        shell: bash -l {0}
+        run: |
+          nohup mlflow server \
+            --backend-store-uri file:./mlruns \
+            --default-artifact-root ./mlruns \
+            --host 127.0.0.1 \
+            --port 5000 > mlflow.log 2>&1 &
+          sleep 10
+
       - name: Run MLflow project
         shell: bash -l {0}
         run: |
@@ -36,6 +49,9 @@ jobs:
 
       - name: Get latest MLflow run_id
         run: |
-          RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
+          EXPERIMENT_ID=$(mlflow experiments list | grep 'Eksperimen Loan Approval Model' | awk '{print $1}')
+          echo "Experiment ID: $EXPERIMENT_ID"
+
+          RUN_ID=$(mlflow runs list -e $EXPERIMENT_ID --order-by start_time desc | awk 'NR==2 {print $1}')
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
