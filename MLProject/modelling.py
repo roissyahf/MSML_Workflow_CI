@@ -1,4 +1,5 @@
 import pandas as pd
+import mlflow
 from lightgbm import LGBMClassifier
 import joblib
 import os
@@ -22,26 +23,6 @@ class MLModel:
                y_test = df_test['loan_status']
                return X_train, y_train, X_test, y_test
 
-        def train(self, X_train, y_train):
-                """Train the model using the training data."""
-                self.model.fit(X_train, y_train)
-                return self.model
-        
-        def evaluate(self, X_test, y_test):
-                """Evaluate the model"""
-                return self.model.score(X_test, y_test)
-
-        def predict(self, X_test):
-                """Make predictions using the trained model."""
-                return self.model.predict(X_test)
-
-        def save_model(self, path):
-                joblib.dump(self.model, path)
-
-        def load_model(self, path):
-               """Load the model from disk"""
-               self.model = joblib.load(path)
-
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
 
@@ -58,12 +39,34 @@ if __name__ == '__main__':
     # split features and target variable
     X_train, y_train, X_test, y_test = model.split_X_y(df_train, df_test)
 
-    # train the model
-    model.train(X_train, y_train)
+    # Check for existing MLflow run, or start a new one
+    if mlflow.active_run() is None:
+        mlflow_run = mlflow.start_run()
+    else:
+        mlflow_run = mlflow.active_run()
 
-    # evaluate the model
-    score = model.evaluate(X_test, y_test)
-    print(f"Model accuracy: {score}")
+    with mlflow_run:
+        # Log parameters
+        mlflow.log_param("model_type", "LGBMClassifier")
+        mlflow.log_param("n_estimators", model.model.get_params().get("n_estimators", None))
+        mlflow.log_param("learning_rate", model.model.get_params().get("learning_rate", None))
+        mlflow.log_param("num_leaves", model.model.get_params().get("num_leaves", None))
 
-    # save the model to local file
-    model.save_model("LGBM_v3.joblib")
+        # Train and evaluate
+        model.train(X_train, y_train)
+        score = model.evaluate(X_test, y_test)
+        print(f"Model accuracy: {score}")
+        mlflow.log_metric("accuracy", score)
+
+        # Log model artifact (in MLflow format)
+        mlflow.lightgbm.log_model(model.model, artifact_path="model")
+
+        # Save local model
+        model.log_artifact("LGBM_v3.joblib")
+
+    # End run if we started it
+    if mlflow_run and mlflow_run.info.run_id != mlflow.active_run().info.run_id:
+        mlflow.end_run()
+
+
+
