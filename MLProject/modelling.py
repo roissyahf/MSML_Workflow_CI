@@ -88,8 +88,9 @@ if __name__ == '__main__':
         model.save_model("LGBM_v3.joblib")
 
     # End run if we started it
-    if mlflow_run and mlflow_run.info.run_id != mlflow.active_run().info.run_id:
-        mlflow.end_run()
+    active_run = mlflow.active_run()
+    if mlflow_run and (active_run is None or mlflow_run.info.run_id != active_run.info.run_id):
+          mlflow.end_run()
 
 
 
