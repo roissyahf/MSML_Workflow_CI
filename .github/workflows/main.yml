@@ -66,6 +66,12 @@ jobs:
           path: mlruns/
           retention-days: 30
 
+      - name: List artifacts for Debugging
+        shell: bash -l {0}
+        run: |
+          echo "Listing run artifacts..."
+          find ./mlruns -type f
+
       - name: Build Docker Model
         shell: bash -l {0}
         env:
