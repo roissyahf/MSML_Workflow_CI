@@ -38,6 +38,10 @@ class MLModel:
         def save_model(self, path):
                 joblib.dump(self.model, path)
 
+        def load_model(self, path):
+               """Load the model from disk"""
+               self.model = joblib.load(path)
+
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
 
