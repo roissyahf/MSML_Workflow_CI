@@ -1,5 +1,6 @@
 import pandas as pd
 import mlflow
+from mlflow.models.signature import infer_signature
 from lightgbm import LGBMClassifier
 import joblib
 import os
@@ -76,8 +77,12 @@ if __name__ == '__main__':
         print(f"Model accuracy: {score}")
         mlflow.log_metric("accuracy", score)
 
+        # Predict once to infer signature
+        predictions = model.model.predict(X_test)
+        signature = infer_signature(X_test, predictions)
+
         # Log model artifact (in MLflow format)
-        mlflow.lightgbm.log_model(model.model, artifact_path="model")
+        mlflow.lightgbm.log_model(model.model, artifact_path="model", input_example=X_train[0:5], signature=signature)
 
         # Save local model
         model.save_model("LGBM_v3.joblib")
