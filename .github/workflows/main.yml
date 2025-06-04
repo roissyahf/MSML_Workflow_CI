@@ -64,8 +64,11 @@ jobs:
           retention-days: 30
 
       - name: Install mlflow and Build Docker Model
+        env:
+          RUN_ID: ${{ env.RUN_ID }}
         run: |
           pip install mlflow
+          echo "RUN_ID: $RUN_ID"
           mlflow models build-docker --model-uri "runs:/$RUN_ID/model" --name "loan-approval-msml" 
 
       - name: Log in to Docker Hub
