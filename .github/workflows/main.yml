@@ -55,11 +55,9 @@ jobs:
           which mlflow
           mlflow --version
 
-          EXPERIMENT_ID=$(mlflow experiments list | grep 'Eksperimen Loan Approval Model' | awk '{print $1}')
-          echo "Experiment ID: $EXPERIMENT_ID"
-
-          RUN_ID=$(mlflow runs list -e $EXPERIMENT_ID --order-by start_time desc | awk 'NR==2 {print $1}')
-          echo "RUN_ID=$RUN_ID" | tee -a $GITHUB_ENV
+          RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+          echo "Latest run_id: $RUN_ID"
 
       - name: Upload mlruns as artifact
         uses: actions/upload-artifact@v4
