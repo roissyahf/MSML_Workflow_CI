@@ -80,7 +80,7 @@ if __name__ == '__main__':
         mlflow.lightgbm.log_model(model.model, artifact_path="model")
 
         # Save local model
-        model.log_artifact("LGBM_v3.joblib")
+        model.save_model("LGBM_v3.joblib")
 
     # End run if we started it
     if mlflow_run and mlflow_run.info.run_id != mlflow.active_run().info.run_id:
