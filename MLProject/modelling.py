@@ -23,6 +23,24 @@ class MLModel:
                y_test = df_test['loan_status']
                return X_train, y_train, X_test, y_test
 
+        def train(self, X_train, y_train):
+                """Train the model."""
+                self.model.fit(X_train, y_train)
+                return self.model
+
+        def evaluate(self, X_test, y_test):
+                """Evaluate the model."""
+                return self.model.score(X_test, y_test)
+
+        def predict(self, X_test):
+                return self.model.predict(X_test)
+
+        def save_model(self, path):
+                joblib.dump(self.model, path)
+
+        def load_model(self, path):
+                self.model = joblib.load(path)
+
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
 
